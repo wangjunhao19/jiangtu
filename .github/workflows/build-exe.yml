@@ -46,24 +46,29 @@ jobs:
       - name: Install Inno Setup
         run: |
           choco install innosetup -y
-          echo "C:\Program Files (x86)\Inno Setup 6" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          $isPath = Get-ChildItem "C:\Program Files (x86)\Inno Setup*" -Directory | Select-Object -First 1 -ExpandProperty FullName
+          echo $isPath | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          echo "Inno Setup path: $isPath"
 
       - name: Build Installer with Inno Setup
         run: |
-          iscc installer.iss
+          Write-Host "Current directory: $(Get-Location)"
+          Write-Host "Files in dist:"
+          Get-ChildItem dist -Recurse | Select-Object FullName | Format-Table -AutoSize
+          iscc installer.iss /DSourcePath="$PWD\"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: JiangTu-Setup
-          path: output/*.exe
+          path: "**/output/*.exe"
           retention-days: 30
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
-          files: output/*.exe
+          files: "**/output/*.exe"
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
