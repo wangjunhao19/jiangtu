@@ -1,4 +1,4 @@
-name: Build Windows EXE
+name: Build Windows Installer
 
 on:
   push:
@@ -20,9 +20,8 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      - name: Install system dependencies (OSGeo4W)
+      - name: Install GIS dependencies
         run: |
-          # Install GDAL binaries needed by fiona/rasterio/geopandas
           pip install --only-binary :all: numpy==1.26.4
           pip install --only-binary :all: pandas==2.2.2
           pip install --only-binary :all: shapely==2.0.4
@@ -34,7 +33,6 @@ jobs:
       - name: Install Python dependencies
         run: |
           pip install -r requirements.txt
-          # Reinstall GIS packages with binary wheels if needed
           pip install --only-binary :all: fiona rasterio geopandas pyproj shapely || true
 
       - name: Verify imports
@@ -45,22 +43,27 @@ jobs:
         run: |
           pyinstaller build.spec --noconfirm
 
-      - name: Package output
+      - name: Install Inno Setup
         run: |
-          Compress-Archive -Path "dist/疆途·智能巡查管理平台V1.0/*" -DestinationPath "dist/疆途智能巡查管理平台V1.0.zip"
+          choco install innosetup -y
+          echo "C:\Program Files (x86)\Inno Setup 6" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Build Installer with Inno Setup
+        run: |
+          iscc installer.iss
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: JiangTu-Windows-EXE
-          path: dist/*.zip
+          name: JiangTu-Setup
+          path: output/*.exe
           retention-days: 30
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/*.zip
+          files: output/*.exe
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
