@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.so
+
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# PyInstaller
+build/
+dist/
+*.spec.bak
+
+# 日志
+logs/*.log
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 用户数据
+*.json
+!package.json
+
+# 敏感配置（可选）
+# .env
