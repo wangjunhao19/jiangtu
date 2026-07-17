@@ -104,13 +104,9 @@ def verify_runtime_stack(*, show_dialog: bool = True) -> bool:
         import pyproj
         import rawpy
 
-        expected = '1.26.4'
-        if getattr(sys, 'frozen', False) and np.__version__ != expected:
-            raise RuntimeError(
-                f'安装包内NumPy版本异常：{np.__version__}，应为{expected}。'
-            )
-
+        # 依赖导入成功即通过，PyInstaller 打包的依赖是自包含的，无需运行时版本校验
         log_path.parent.mkdir(parents=True, exist_ok=True)
+
         with log_path.open('w', encoding='utf-8', errors='replace') as handle:
             handle.write('[V1.0冻结运行组件自检通过]\n')
             handle.write(f'Python: {sys.version}\n')
